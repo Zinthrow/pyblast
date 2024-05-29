@@ -2,7 +2,7 @@ from .wrapper import Blastn
 import uuid
 from io import StringIO
 
-class Localdb(object):
+class Localdb:
     def __init__(self) -> None:
         self.id = None
         self.dbpath = None
@@ -55,6 +55,13 @@ class Localdb(object):
         data['Volumes'] = lines[8].strip()
 
         return data
+
+
+class Parser:
+    def __init__(self) -> None:
+        self.wrapper = None
+        self.parameters = {}
+        
 
     
 
