@@ -4,61 +4,97 @@ from subprocess import call, run
 
 from sh import blastn, makeblastdb, blastdbcmd
 
+class Blastn(object):
+    def __init__(self):
+        None
 
-def blastn_from_database(self, query: str, out: str, **kwargs) -> StringIO:
-    """
-    Used for specificity analysis using a blast database.
+    def get_default_parameters():
+        params = {
+            'db': 'nt',
+            'task': 'blastn',
+            'perc_identity': 92,
+            'qcov_hsp_perc': 92,
+            'max_target_seqs': 5000,
+            'threads': 30,
+            'buffer': False,
+            'word_size': 7,
+            'gapopen': 8,
+            'gapextend': 6,
+            'reward': 5,
+            'penalty': -4,
+            'max_hsps': 1,
+            'evalue': 10000000000000,
+            'remote': None,
+            'outfmt': '6',
+            'no_scientific_names': None,
+            'negative_taxid_path': None,
+            'dust': 'no'
+        }
+        return params
 
-    :param query: input fasta path
-    :param out: .tab output file
-    :param kwargs: dictionary of additional optional parameters
-    """
-    # Default parameters
-    params = {
-        'query': query,
-        'db': 'nt',
-        'task': 'blastn',
-        'perc_identity': 92,
-        'qcov_hsp_perc': 92,
-        'max_target_seqs': 5000,
-        'threads': 30,
-        'buffer': False,
-        'word_size': 7,
-        'gapopen': 8,
-        'gapextend': 6,
-        'reward': 5,
-        'penalty': -4,
-        'max_hsps': 1,
-        'evalue': 10000000000000,
-        'remote': None,
-        'outfmt': '6',
-        'no_scientific_names': None,
-        'negative_taxid_path': None,
-        'dust': 'no'
-    }
+    def blastn_from_database(self, query: str,
+                             out: str,
+                             buffer: bool = False,
+                             **kwargs) -> StringIO:
+        """
+        Used for specificity analysis using a blast database.
 
-    # Update default parameters with any user-provided ones
-    params.update(kwargs)
+        :param query: input fasta path
+        :type query: str
+        :param out: .tab output file
+        :type out: str
+        :param buffer: write to file or to buffer
+        :type buffer: bool
+        :param kwargs: dictionary of additional optional parameters
+        """
 
-    cline = []
-    # Building the command line
-    for option in params:
-        val = params[option]
-        if val is not None:
-            cline.append('-' + option)
-            cline.append(val)
+        outfmt = "6 qseqid sseqid pident qcovhsp length qlen mismatch gapopen qstart qend sstart send evalue bitscore qseq sseq staxids sscinames"
 
-    if params['remote']:
-        cline.append("-remote")
+        # Default parameters
+        params = {
+            'query': query,
+            'db': 'nt',
+            'task': 'blastn',
+            'perc_identity': 92,
+            'qcov_hsp_perc': 92,
+            'max_target_seqs': 5000,
+            'num_threads': 10,
+            'word_size': 7,
+            'gapopen': 8,
+            'gapextend': 6,
+            'reward': 5,
+            'penalty': -4,
+            'max_hsps': 1,
+            'evalue': 10000000000000,
+            'remote': None,
+            'outfmt': outfmt,
+            'no_scientific_names': None,
+            'negative_taxid_path': None,
+            'dust': 'no'
+        }
 
-    if params['buffer']:
-        buf = StringIO()
-        blastn(cline, _out=buf)
-        buf.seek(0)
-        return buf
-    else:
-        cline.extend(["-out", out])
-        blastn(cline)
+        # Update default parameters with any user-provided ones
+        params.update(kwargs)
+
+        cline = []
+        # Building the command line
+        for option in params:
+            val = params[option]
+            if val is not None:
+                cline.append('-' + option)
+                cline.append(str(val))
+
+        if params['remote']:
+            cline.append("-remote")
+
+        if buffer:
+            buf = StringIO()
+            blastn(cline, _out=buf)
+            buf.seek(0)
+            return buf
+        else:
+            cline.extend(["-out", out])
+            blastn(cline)
 
     def fetch_taxdb(self):
         """

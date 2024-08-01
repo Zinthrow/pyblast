@@ -34,14 +34,14 @@ def _pip_requirement(req):
     return [req]
 
 
-def _strip_comments(l):
-    return l.split('#', 1)[0].strip()
+def _strip_comments(line):
+    return line.split('#', 1)[0].strip()
 
 
 def _reqs(*f):
     return [
         _pip_requirement(r) for r in (
-            _strip_comments(l) for l in open('requirements.txt').readlines())
+            _strip_comments(line) for line in open('requirements.txt').readlines())
         if r]
 
 
@@ -59,13 +59,14 @@ def install_requires():
 
 
 setup(
-    name='pynblast',
-    version=find_version("pyblast", "__init__.py"),
+    name='pyblast',
+    version=find_version("src/pyblast/", "__init__.py"),
     description='python package for command line blast',
     url='https://github.com/Zinthrow/pyblast',
     author='Alexander Larsen',
     author_email='alarsen525@gmail.com',
-    packages=find_packages(),
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
     include_package_data=True,
     install_requires=install_requires(),
     python_requires=">=3.7"

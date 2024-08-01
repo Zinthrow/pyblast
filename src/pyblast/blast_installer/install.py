@@ -45,8 +45,8 @@ def install_blast(blast_version: str):
     subprocess.run(['tar', '-xzf', filename])
     return f"BLAST installed successfully from {filename}"
 
-install_status = install_blast(BLAST_VERSION)
-print(install_status)
+#install_status = install_blast(BLAST_VERSION)
+#print(install_status)
 
 
 def test_blast_installation(blast_executable_path):
