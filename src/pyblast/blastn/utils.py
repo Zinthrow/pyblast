@@ -1,6 +1,6 @@
-from .wrapper import Blastn
+from .wrapper import Blastn as blast_wrapper
 import uuid
-from io import StringIO
+import pandas as pd
 
 
 class Localdb:
@@ -9,21 +9,31 @@ class Localdb:
         self.taxid = 0
         self.dbpath = None
         self.info = None
-        self.blastwrapper = Blastn()
+        self.blast_wrapper = blast_wrapper()
 
     def get_blastdb_info(self, dbpath):
-        text = self.blastwrapper.get_blast_db_info(dbpath)
+        text = self.blast_wrapper.get_blast_db_info(dbpath)
         info = self.parse_blast_db_info(text)
         self.info = info
         return info
 
     def make_from_fasta(self, fasta_path: str, dbname: str = None):
         if dbname is None:
-            self.id = uuid.uuid4()
+            self.id = str(uuid.uuid4())
         else:
             self.id = dbname
-        self.dbpath = self.blastwrapper.makeblastdb(fasta_path, self.id, self.taxid)
+        self.dbpath = self.blast_wrapper.makeblastdb(fasta_path, self.id, self.taxid)
         self.get_blastdb_info(self.dbpath)
+
+    def pull_fasta_from_db(self, 
+                           subjects: list, 
+                           out_fasta: str, 
+                           buffer: bool = False):
+        
+        subjects = ','.join(subjects)
+        buf = self.blast_wrapper.write_db_hits_to_fasta(self.dbpath, subjects, out_fasta, buffer=buffer)
+        if buffer:
+            return buf
 
     def parse_blast_db_info(self, text: str):
         """
@@ -61,10 +71,19 @@ class Localdb:
         return data
 
 
-class Parser:
+class BlastParser:
     def __init__(self) -> None:
-        self.wrapper = None
+        self.wrapper = blast_wrapper()
         self.parameters = {}
+
+    def read_tab_file(self, filepath, outfmt=None):
+        if outfmt is None:
+            outfmt = self.wrapper.get_default_parameters()['outfmt']
+        headers = outfmt.split(' ')[1:]
+        out_df = pd.read_csv(filepath, sep='\t')
+        out_df.columns = headers
+
+        return out_df
 
 
     

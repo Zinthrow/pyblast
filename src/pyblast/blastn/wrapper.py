@@ -4,19 +4,19 @@ from subprocess import call, run
 
 from sh import blastn, makeblastdb, blastdbcmd
 
+
 class Blastn(object):
     def __init__(self):
-        None
+        pass
 
-    def get_default_parameters():
+    def get_default_parameters(self):
         params = {
             'db': 'nt',
             'task': 'blastn',
             'perc_identity': 92,
             'qcov_hsp_perc': 92,
             'max_target_seqs': 5000,
-            'threads': 30,
-            'buffer': False,
+            'num_threads': 10,
             'word_size': 7,
             'gapopen': 8,
             'gapextend': 6,
@@ -25,7 +25,7 @@ class Blastn(object):
             'max_hsps': 1,
             'evalue': 10000000000000,
             'remote': None,
-            'outfmt': '6',
+            'outfmt': '6 qseqid sseqid pident qcovhsp length qlen mismatch gapopen qstart qend sstart send evalue bitscore qseq sseq staxids sscinames',
             'no_scientific_names': None,
             'negative_taxid_path': None,
             'dust': 'no'
@@ -48,33 +48,12 @@ class Blastn(object):
         :param kwargs: dictionary of additional optional parameters
         """
 
-        outfmt = "6 qseqid sseqid pident qcovhsp length qlen mismatch gapopen qstart qend sstart send evalue bitscore qseq sseq staxids sscinames"
-
         # Default parameters
-        params = {
-            'query': query,
-            'db': 'nt',
-            'task': 'blastn',
-            'perc_identity': 92,
-            'qcov_hsp_perc': 92,
-            'max_target_seqs': 5000,
-            'num_threads': 10,
-            'word_size': 7,
-            'gapopen': 8,
-            'gapextend': 6,
-            'reward': 5,
-            'penalty': -4,
-            'max_hsps': 1,
-            'evalue': 10000000000000,
-            'remote': None,
-            'outfmt': outfmt,
-            'no_scientific_names': None,
-            'negative_taxid_path': None,
-            'dust': 'no'
-        }
+        params = self.get_default_parameters()
 
         # Update default parameters with any user-provided ones
         params.update(kwargs)
+        params['query'] = query
 
         cline = []
         # Building the command line
@@ -139,7 +118,7 @@ class Blastn(object):
             dbname = blast_dir + dbname
 
         makeblastdb(
-            "-dbtype", dbtype, "-in", input_fasta, "-taxid", taxid, "-out", dbname
+            "-dbtype", dbtype, "-in", input_fasta, "-parse_seqids", "-taxid", taxid, "-out", dbname
         )
 
         return dbname
