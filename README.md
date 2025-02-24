@@ -87,6 +87,26 @@ from pyblast.blast_installer.install import test_blast_installation
 test_blast_installation("blastn")  # Returns True if BLAST is installed
 ```
 
+### Check Database general info
+
+```python
+transcript_db = '../../software/blast_databases/blastdb/grch38_cdna'
+
+pblast = PyBlastnAPI()
+pblast.local_db.dbpath = transcript_db
+
+pblast.local_db.get_blastdb_info()
+```
+```
+{'Database': 'GCF_000001405.40_GRCh38.p14_cds_from_genomic.fna',
+ 'Sequence Count': 145439,
+ 'Total Bases': 297167579,
+ 'Date': 'Oct 2, 2024  6:34 PM',
+ 'Longest Sequence': 107976,
+ 'BLASTDB Version': 5,
+ 'Volumes': '/mnt/c/Users/alars/Projects/software/blast_databases/blastdb/grch38_cdna'}
+```
+
 ## File Structure
 
 ```
