@@ -1,6 +1,7 @@
 from .wrapper import Blastn as blast_wrapper
 import uuid
 import pandas as pd
+from Bio import SeqIO
 
 
 class Localdb:
@@ -11,7 +12,9 @@ class Localdb:
         self.info = None
         self.blast_wrapper = blast_wrapper()
 
-    def get_blastdb_info(self, dbpath):
+    def get_blastdb_info(self, dbpath=None):
+        if dbpath is None and self.dbpath is not None:
+            dbpath = self.dbpath
         text = self.blast_wrapper.get_blast_db_info(dbpath)
         info = self.parse_blast_db_info(text)
         self.info = info
@@ -76,7 +79,7 @@ class BlastParser:
         self.wrapper = blast_wrapper()
         self.parameters = {}
 
-    def read_tab_file(self, filepath, outfmt=None):
+    def read_tab_file(self, filepath, outfmt=None, **kwargs):
         if outfmt is None:
             outfmt = self.wrapper.get_default_parameters()['outfmt']
         headers = outfmt.split(' ')[1:]
@@ -85,8 +88,27 @@ class BlastParser:
 
         return out_df
 
+    def check_missing_queries(self, out_df: pd.DataFrame, query_fasta_path: str) -> pd.DataFrame:
+        """add missing queries to blastdf
 
-    
+        :param out_df: blast tab output
+        :type out_df: pd.DataFrame
+        :param query_fasta_path: blast input fasta
+        :type query_fasta_path: str
+        :return: ammended dataframe
+        :rtype: pd.DataFrame
+        """
 
-    
+        q_dict = {q: None for q in out_df.qseqid}
+        missing_dict = {}
+
+        for record in SeqIO.parse(query_fasta_path, 'fasta'):
+            id_s = record.id
+            if id_s not in q_dict:
+                missing_dict[id_s] = {'qseqid': id_s}
+
+        miss_df = pd.DataFrame(missing_dict).T
+        bdf2 = pd.concat([out_df, miss_df]).fillna(0)
+        
+        return bdf2
 
