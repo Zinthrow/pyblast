@@ -16,37 +16,3 @@ RUN apt-get update && \
     python3-dev \
     ncbi-entrez-direct
 
-WORKDIR /home/root/
-RUN wget https://github.com/primer3-org/primer3/archive/refs/heads/main.zip -O primer3.zip && \
-    unzip primer3.zip && \ 
-    wget https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/ncbi-blast-2.16.0+-x64-linux.tar.gz -O blast.tar.gz && \
-    tar -xvf blast.tar.gz && \
-    wget https://github.com/ViennaRNA/ViennaRNA/releases/download/v2.5.0/ViennaRNA-2.5.0.tar.gz && \ 
-    tar -zxvf ViennaRNA-2.5.0.tar.gz && \
-    wget https://mafft.cbrc.jp/alignment/software/mafft-7.525-with-extensions-src.tgz -O mafft.tar.gz && \
-    tar -zxvf mafft.tar.gz && \
-    wget https://drive5.com/downloads/usearch11.0.667_i86linux32.gz -O /usr/bin/usearch.gz && \
-    gunzip /usr/bin/usearch.gz && \
-    chmod 777 /usr/bin/usearch && \
-    mkdir -p /data/shared/software/ && \
-    rm *.gz *.zip
-
-
-ENV PATH "$PATH:/home/root/ncbi-blast-2.16.0+/bin/:/home/root/primer3-main/src/:/home/root/ViennaRNA-2.5.0/src/bin/"
-
-WORKDIR /home/root/primer3-main/src
-RUN make
-
-WORKDIR /home/root/mafft-7.490-with-extensions/core/
-RUN make clean && \
-    make && \
-    make install
-    
-        
-WORKDIR /home/root/ViennaRNA-2.5.0
-RUN ./configure && \
-    make && \ 
-    make install && \
-    find . -type f -name "*" -not -name "RNA*" -delete
-
-RUN python3 -m pip install setuptools jupyterlab
